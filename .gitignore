@@ -1,0 +1,12 @@
+# Django specific
+*.log
+*.pot
+*.pyc
+__pycache__/
+db.sqlite3
+media/
+staticfiles/
+
+# If you're using Docker
+.env
+venv/
