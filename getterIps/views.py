@@ -1,17 +1,31 @@
 from django.http import JsonResponse
-import requests
-import os
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.utils.decorators import method_decorator
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_ipv4_address, validate_ipv6_address
 from bs4 import BeautifulSoup
 from lxml import etree
+from .models import ExcludedIP #Modelo para excluir IPS y guardarlo en la BD. 
+import json
+import requests
+import os
 import random
 import time
 
+
+# Documentación de investigación Django IP's: https://docs.djangoproject.com/es/5.1/ref/validators/
 """Dato Random: Al principio perdí mucho tiempo usando diversos, headers y proxies para intentar bypassear el trafico,
    pero la misma pagina me dice que cada 15 min puedo volver a obtener la lista así que no hay problema, cada 15 actualizo"""
 
 # Ruta del archivo para almacenar la última actualización
 LAST_UPDATE_FILE = 'last_update.txt'
 IPS_FILE = 'ips-tor1.txt'
+
+
+################################################################################## Métodos/Funciones ##################################################################################
+
+############ GET
 
 def fetch_tor_ips():
     url = 'https://www.dan.me.uk/torlist/?full'
@@ -58,6 +72,31 @@ def get_last_update_time():
             return float(file.read().strip())
     return 0
 
+############ POST
+
+def exclude_tor_ips(data):
+    ip = data.get('ip')
+
+    if not ip:
+        return JsonResponse({'error': 'IP is required'}, status=400)
+    
+    # Validar IP
+    try:
+        validate_ipv4_address(ip)
+    except ValidationError:
+        try:
+            validate_ipv6_address(ip)
+        except ValidationError:
+            return JsonResponse({'error': 'Invalid IP address'}, status=400)
+
+    # Guardar en base de datos
+    ExcludedIP.objects.get_or_create(ip=ip)
+
+    return JsonResponse({'message': 'IP added successfully'}, status=200)
+
+################################################################################## VISTAS ##################################################################################
+
+# Primer vista para el Endpoint #1
 def tor_ips_view(request):
     current_time = time.time()
     last_update_time = get_last_update_time()
@@ -71,3 +110,14 @@ def tor_ips_view(request):
     # Lee las IPs del archivo y devuelve la respuesta JSON
     ips_from_file = read_ips_from_file(filename=IPS_FILE)
     return JsonResponse({'ips': ips_from_file})
+
+# Segunda vista para el Endpoint #2
+@csrf_exempt
+@require_POST
+def exclude_ip_view(request):
+    try:
+        data = json.loads(request.body)
+        response = exclude_tor_ips(data)
+        return response
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
