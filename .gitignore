@@ -10,3 +10,4 @@ staticfiles/
 # If you're using Docker
 .env
 venv/
+docker-compose.override.yml
