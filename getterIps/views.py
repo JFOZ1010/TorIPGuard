@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_GET
 from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv4_address, validate_ipv6_address
 from bs4 import BeautifulSoup
@@ -32,13 +32,14 @@ def fetch_tor_ips():
     #url2 = 'https://www.bigdatacloud.com/'
     ips = set()
     try:
-        response = requests.get(url, timeout=15)
+        response = requests.get(url, timeout=15) #un timeout de 15 si. 
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         ip_lines = soup.get_text().splitlines()
         for ip in ip_lines:
             if ip.strip():
                 ips.add(ip.strip())
+        time.sleep(10) #espero 10 segundos entre solicitudes.
     except requests.RequestException as e:
         print(f"Error fetching IPs from {url}: {e}")
 
@@ -74,7 +75,6 @@ def get_last_update_time():
 
 ############ POST
 
-@require_http_methods(["POST"])
 def exclude_tor_ips(request):
     try:
         data = json.loads(request.body)
@@ -103,9 +103,35 @@ def exclude_tor_ips(request):
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
+
+############ POST - FILTERED IP'S
+
+def tor_ips_filtered():
+    """Filtra las IPs de TOR excluyendo las IPs de la base de datos."""
+    # Obtener IPs desde las fuentes externas
+    all_ips = read_ips_from_file() #llamo a la def que almaceno las ips en el .txt, leo directamente el .txt
+    
+    # Obtener IPs excluidas de la base de datos
+    excluded_ips = ExcludedIP.objects.values_list('ip_address', flat=True)
+    excluded_ips_set = set(excluded_ips)
+    #print(f'IPS EXCLUIDAS: {excluded_ips_set}')
+
+
+    # Convertir todas las IPs de all_ips a conjunto para que sea compatible con excluded_ips_set
+    all_ips_set = set(all_ips)
+    #print(f'IPS SET: {all_ips_set}')
+
+    # Filtrar IPs excluidas
+    filtered_ips = all_ips_set - excluded_ips_set
+    #print(f'IPS FILTRADAS: {filtered_ips}')
+
+    
+    return list(filtered_ips)
+
 ################################################################################## VISTAS ##################################################################################
 
 # Primer vista para el Endpoint #1
+@csrf_exempt
 def tor_ips_view(request):
     current_time = time.time()
     last_update_time = get_last_update_time()
@@ -120,15 +146,26 @@ def tor_ips_view(request):
     ips_from_file = read_ips_from_file(filename=IPS_FILE)
     return JsonResponse({'ips': ips_from_file})
 
-# Segunda vista para el Endpoint #2    
+# Segunda vista para el Endpoint #2  
+@require_http_methods(["POST"])  
 @csrf_exempt
 def exclude_ip_view(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            response = exclude_tor_ips(request)
-            return response
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON'}, status=400)
-    else:
-        return JsonResponse({'error': 'Only POST method is allowed'}, status=405)
+    try:
+        data = json.loads(request.body)
+        response = exclude_tor_ips(request)
+        return response
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+# Tercera vista para el Endpoint #3 - IP's Filtradas: Retornando todas las ips excepto las que se enviaron a la BD.    
+#@require_GET
+@require_http_methods(["GET"])  
+def tor_ips_filtered_view(request):
+    try:
+        # Obtener las IPs filtradas
+        filtered_ips = tor_ips_filtered()
+        
+        # Devolver las IPs en formato JSON
+        return JsonResponse(filtered_ips, safe=False)
+    except Exception as e: 
+        return JsonResponse({'error': str(e)}, status=500)
