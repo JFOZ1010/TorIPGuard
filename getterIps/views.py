@@ -1,33 +1,63 @@
-from django.http import JsonResponse
-from django.views.decorators.http import require_http_methods
-from django.views.decorators.http import require_GET
-from django.views.decorators.csrf import csrf_exempt
-from django.core.exceptions import ValidationError
-from django.core.validators import validate_ipv4_address, validate_ipv6_address
-from bs4 import BeautifulSoup
-from lxml import etree
-from .models import ExcludedIP #Modelo para excluir IPS y guardarlo en la BD. 
-import json
-import requests
-import os
-import random
-import time
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from .utils import fetch_tor_ips, save_ips_to_file, update_last_update_time, get_last_update_time, read_ips_from_file
+from .ip_manager import IPManager
 
+import time 
 
 # Documentación de investigación Django IP's: https://docs.djangoproject.com/es/5.1/ref/validators/
 """Dato Random: Al principio perdí mucho tiempo usando diversos, headers y proxies para intentar bypassear el trafico,
    pero la misma pagina me dice que cada 15 min puedo volver a obtener la lista así que no hay problema, cada 15 actualizo"""
 
+@api_view(['GET'])
+def tor_ips_view(request):
+    current_time = time.time()
+    last_update_time = get_last_update_time()
+
+    # Actualiza las IPs si han pasado más de 15 minutos
+    if current_time - last_update_time > 15 * 60:
+        ips = fetch_tor_ips()
+        save_ips_to_file(ips, filename='ips-tor1.txt')
+        update_last_update_time()
+
+    # Lee las IPs del archivo y devuelve la respuesta JSON
+    ips_from_file = read_ips_from_file(filename='ips-tor1.txt')
+    return Response({'ips': ips_from_file}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def exclude_ip_view(request):
+    return IPManager.exclude_tor_ips(request)
+
+@api_view(['GET'])
+def tor_ips_filtered_view(request):
+    try:
+        filtered_ips = IPManager.tor_ips_filtered()
+        return Response(filtered_ips, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+
+
+
+
+
+
+
+
 # Ruta del archivo para almacenar la última actualización
-LAST_UPDATE_FILE = 'last_update.txt'
-IPS_FILE = 'ips-tor1.txt'
+#LAST_UPDATE_FILE = 'last_update.txt'
+#IPS_FILE = 'ips-tor1.txt'
 
 
 ################################################################################## Métodos/Funciones ##################################################################################
 
 ############ GET
 
-def fetch_tor_ips():
+""" def fetch_tor_ips():
     url = 'https://www.dan.me.uk/torlist/?full'
     #url2 = 'https://www.bigdatacloud.com/'
     ips = set()
@@ -107,7 +137,7 @@ def exclude_tor_ips(request):
 ############ POST - FILTERED IP'S
 
 def tor_ips_filtered():
-    """Filtra las IPs de TOR excluyendo las IPs de la base de datos."""
+    #Filtra las IPs de TOR excluyendo las IPs de la base de datos.
     # Obtener IPs desde las fuentes externas
     all_ips = read_ips_from_file() #llamo a la def que almaceno las ips en el .txt, leo directamente el .txt
     
@@ -127,11 +157,11 @@ def tor_ips_filtered():
 
     
     return list(filtered_ips)
-
+ """
 ################################################################################## VISTAS ##################################################################################
 
 # Primer vista para el Endpoint #1
-@csrf_exempt
+""" @api_view(['GET'])
 def tor_ips_view(request):
     current_time = time.time()
     last_update_time = get_last_update_time()
@@ -141,31 +171,30 @@ def tor_ips_view(request):
         ips = fetch_tor_ips()
         save_ips_to_file(ips, filename=IPS_FILE)
         update_last_update_time()
-    
+
     # Lee las IPs del archivo y devuelve la respuesta JSON
     ips_from_file = read_ips_from_file(filename=IPS_FILE)
-    return JsonResponse({'ips': ips_from_file})
+    return Response({'ips': ips_from_file}, status=status.HTTP_200_OK)
 
 # Segunda vista para el Endpoint #2  
-@require_http_methods(["POST"])  
-@csrf_exempt
+@api_view(['POST'])
 def exclude_ip_view(request):
-    try:
-        data = json.loads(request.body)
-        response = exclude_tor_ips(request)
-        return response
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+    serializer = ExcludedIPSerializer(data=request.data)
+    
+    if serializer.is_valid():
+        serializer.save()
+        return Response({'message': 'IP added successfully'}, status=status.HTTP_201_CREATED)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # Tercera vista para el Endpoint #3 - IP's Filtradas: Retornando todas las ips excepto las que se enviaron a la BD.    
-#@require_GET
-@require_http_methods(["GET"])  
+@api_view(['GET'])
 def tor_ips_filtered_view(request):
     try:
         # Obtener las IPs filtradas
         filtered_ips = tor_ips_filtered()
         
         # Devolver las IPs en formato JSON
-        return JsonResponse(filtered_ips, safe=False)
-    except Exception as e: 
-        return JsonResponse({'error': str(e)}, status=500)
+        return Response(filtered_ips, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) """
