@@ -1,6 +1,6 @@
 from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
 from django.utils.decorators import method_decorator
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv4_address, validate_ipv6_address
@@ -74,25 +74,34 @@ def get_last_update_time():
 
 ############ POST
 
-def exclude_tor_ips(data):
-    ip = data.get('ip')
-
-    if not ip:
-        return JsonResponse({'error': 'IP is required'}, status=400)
-    
-    # Validar IP
+@require_http_methods(["POST"])
+def exclude_tor_ips(request):
     try:
-        validate_ipv4_address(ip)
-    except ValidationError:
+        data = json.loads(request.body)
+        ip = data.get('ip')
+
+        if not ip:
+            return JsonResponse({'error': 'IP is required'}, status=400)
+        
+        # Validar IP
         try:
-            validate_ipv6_address(ip)
+            validate_ipv4_address(ip)
         except ValidationError:
-            return JsonResponse({'error': 'Invalid IP address'}, status=400)
+            try:
+                validate_ipv6_address(ip)
+            except ValidationError:
+                return JsonResponse({'error': 'Invalid IP address'}, status=400)
 
-    # Guardar en base de datos
-    ExcludedIP.objects.get_or_create(ip=ip)
+        # Guardar en base de datos
+        ExcludedIP.objects.get_or_create(ip_address=ip)
 
-    return JsonResponse({'message': 'IP added successfully'}, status=200)
+        # Guardar la IP en el archivo
+        with open('ips-tor2.txt', 'a') as file:
+            file.write(f"{ip}\n")
+
+        return JsonResponse({'message': 'IP added successfully'}, status=200)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
 ################################################################################## VISTAS ##################################################################################
 
@@ -111,13 +120,15 @@ def tor_ips_view(request):
     ips_from_file = read_ips_from_file(filename=IPS_FILE)
     return JsonResponse({'ips': ips_from_file})
 
-# Segunda vista para el Endpoint #2
+# Segunda vista para el Endpoint #2    
 @csrf_exempt
-@require_POST
 def exclude_ip_view(request):
-    try:
-        data = json.loads(request.body)
-        response = exclude_tor_ips(data)
-        return response
-    except json.JSONDecodeError:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            response = exclude_tor_ips(request)
+            return response
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    else:
+        return JsonResponse({'error': 'Only POST method is allowed'}, status=405)
