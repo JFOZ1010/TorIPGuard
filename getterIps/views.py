@@ -2,10 +2,11 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from .utils import fetch_tor_ips, save_ips_to_file, update_last_update_time, get_last_update_time, read_ips_from_file
+from django.core.validators import validate_ipv4_address, validate_ipv6_address
+from django.core.exceptions import ValidationError
+from .utils import fetch_tor_ips, save_ips_to_file, update_last_update_time, get_last_update_time, read_ips_from_file #todas mis funciones necesarias. 
 from .ip_manager import IPManager
 from .models import ExcludedIP
-from .serializer import ExcludedIPSerializer
 
 import time 
 
@@ -45,23 +46,67 @@ def tor_ips_filtered_view(request):
         return Response(filtered_ips, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-# Vista para poder obtener una IP especifica del conjunto de IPS Excluidas. 
+        
+# Vista que devuelve el conteo total de IPs excluidas.
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def ip_excluded_details_view(request, ip_address):
+def count_excluded_ips_view(request):
+    count = ExcludedIP.objects.count()
+    return Response({'count': count}, status=status.HTTP_200_OK)
+
+# Vista que devuelve estadísticas sobre las IPs excluidas. (Totas excluidas, ultima ip, ultima ip creada)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def ip_stats_view(request):
+    total_excluded = ExcludedIP.objects.count()
+    latest_ip = ExcludedIP.objects.latest('created_at') if total_excluded > 0 else None
+    stats = {
+        'total_excluded': total_excluded,
+        'latest_ip': latest_ip.ip_address if latest_ip else None,
+        'latest_ip_created_at': latest_ip.created_at if latest_ip else None,
+    }
+    return Response(stats, status=status.HTTP_200_OK)
+
+# Vista que devuelve el conteo total de todas las IPs del archivo ips-tor1.txt que es el que guarda todas las nuevas IPS obtenidas de la fuente externa.
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def count_all_ips_view(request):
+    ips = read_ips_from_file()
+    count = len(ips)
+    return Response({'count': count}, status=status.HTTP_200_OK)
+
+# Vista que actualiza una IP excluida en la base de datos.
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_excluded_ip_view(request):
+    data = request.data
+    old_ip = data.get('old_ip')
+    new_ip = data.get('new_ip')
+
+    if not old_ip or not new_ip:
+        return Response({'error': 'Both old_ip and new_ip are required'}, status=status.HTTP_400_BAD_REQUEST)
+
     try:
-        ip = ExcludedIP.objects.get(ip_address=ip_address)
-        serializer = ExcludedIPSerializer(ip)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        validate_ipv4_address(new_ip)
+    except ValidationError:
+        try:
+            validate_ipv6_address(new_ip)
+        except ValidationError:
+            return Response({'error': 'Invalid new IP address'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        ip_entry = ExcludedIP.objects.get(ip_address=old_ip)
+        ip_entry.ip_address = new_ip
+        ip_entry.save()
+        return Response({'message': 'IP updated successfully'}, status=status.HTTP_200_OK)
     except ExcludedIP.DoesNotExist:
-        return Response({'error': 'IP not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'error': 'Old IP not found'}, status=status.HTTP_404_NOT_FOUND)
     
-    
-# Vista para poder eliminar una IP especifica del conjunto de IPS Excluidas. 
+# Vista para eliminar una IP específica de las excluidas xd
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
-def delete_ip_excluded_view(request, ip_address):
+def delete_specific_excluded_ip_view(request, ip_address):
+    
     try:
         ip = ExcludedIP.objects.get(ip_address=ip_address)
         ip.delete()
@@ -69,12 +114,13 @@ def delete_ip_excluded_view(request, ip_address):
     except ExcludedIP.DoesNotExist:
         return Response({'error': 'IP not found'}, status=status.HTTP_404_NOT_FOUND)
     
+
+
     
-# Vista para obtener todas las IP's Excluidas que se supone están en la Base de datos :) Obvio jaja
-@api_view(['GET'])
+""" # Vista para obtener todas las IPs excluidas :) 
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def excluded_ips_list_view(request):
-    """Vista que devuelve una lista de todas las IPs excluidas."""
+def list_all_excluded_ips_post_view(request):
     excluded_ips = ExcludedIP.objects.all()
     serializer = ExcludedIPSerializer(excluded_ips, many=True)
-    return Response(serializer.data)
+    return Response(serializer.data, status=status.HTTP_200_OK) """
