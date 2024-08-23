@@ -1,5 +1,6 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from .utils import fetch_tor_ips, save_ips_to_file, update_last_update_time, get_last_update_time, read_ips_from_file
 from .ip_manager import IPManager
@@ -14,6 +15,7 @@ import time
 
 # Vista para obtener todas las IP's obtenidas de la fuente externa :) 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def tor_ips_view(request):
     current_time = time.time()
     last_update_time = get_last_update_time()
@@ -30,11 +32,13 @@ def tor_ips_view(request):
 
 # Vista para enviar una IP a la BD y excluirla de las demás (Para una blacklist)
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def exclude_ip_view(request):
     return IPManager.exclude_tor_ips(request)
 
 # Vista para obtener las IP's excepto las que están en la BD. 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def tor_ips_filtered_view(request):
     try:
         filtered_ips = IPManager.tor_ips_filtered()
@@ -44,6 +48,7 @@ def tor_ips_filtered_view(request):
 
 # Vista para poder obtener una IP especifica del conjunto de IPS Excluidas. 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def ip_excluded_details_view(request, ip_address):
     try:
         ip = ExcludedIP.objects.get(ip_address=ip_address)
@@ -52,8 +57,10 @@ def ip_excluded_details_view(request, ip_address):
     except ExcludedIP.DoesNotExist:
         return Response({'error': 'IP not found'}, status=status.HTTP_404_NOT_FOUND)
     
+    
 # Vista para poder eliminar una IP especifica del conjunto de IPS Excluidas. 
 @api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
 def delete_ip_excluded_view(request, ip_address):
     try:
         ip = ExcludedIP.objects.get(ip_address=ip_address)
@@ -62,8 +69,10 @@ def delete_ip_excluded_view(request, ip_address):
     except ExcludedIP.DoesNotExist:
         return Response({'error': 'IP not found'}, status=status.HTTP_404_NOT_FOUND)
     
+    
 # Vista para obtener todas las IP's Excluidas que se supone están en la Base de datos :) Obvio jaja
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def excluded_ips_list_view(request):
     """Vista que devuelve una lista de todas las IPs excluidas."""
     excluded_ips = ExcludedIP.objects.all()
