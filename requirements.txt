@@ -20,6 +20,8 @@ requests==2.32.3
 setuptools==73.0.1
 soupsieve==2.6
 sqlparse==0.5.1
+ua-parser==0.18.0
 uritemplate==4.1.1
 urllib3==2.2.2
+user-agents==2.2.0
 whitenoise==6.2.0
