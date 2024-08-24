@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from datetime import timedelta
+from logging.handlers import RotatingFileHandler
 
 
 # Carga las variables de entorno desde el archivo .env
@@ -74,10 +75,44 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'getterIps.middleware.RequestLoggingMiddleware',
+    'getterIps.middleware.DeviceBrowserLoggingMiddleware',
+    'getterIps.middleware.UserAuditingMiddleware',
+    'getterIps.middleware.RequestTimeLoggingMiddleware',
 ]
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'api_logs.log'),  # Archivo de log
+            'maxBytes': 10485760,  # 10 MB
+            'backupCount': 5,
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['file'],
+            'level': 'WARNING',  # Solo WARNING y superiores para el logger de Django
+            'propagate': False,
+        },
+        'getterIps.middleware': {
+            'handlers': ['file'],
+            'level': 'DEBUG',  # Registra todos los mensajes DEBUG y superiores
+            'propagate': False,
+        },
+    },
+}
 
 ROOT_URLCONF = 'config.urls'
 
