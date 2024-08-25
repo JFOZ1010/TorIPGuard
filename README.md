@@ -6,7 +6,7 @@
 
 Este proyecto es una API REST para la gestión de IPs maliciosas en redes TOR. La API permite obtener, excluir, y filtrar IPs, así como gestionar la autenticación y auditoría de las solicitudes. Incluye un esquema de permisos que distingue entre usuarios normales y administradores.
 
-**Prueba de concepto funcional en video:** [Ver Video](https://drive.google.com/file/d/19Tovd27FzccF09oAFttbefHXdz0CWrja/view?usp=sharing)
+**Prueba funcional `Endpoints` en video:** [Ver Video](https://drive.google.com/file/d/19Tovd27FzccF09oAFttbefHXdz0CWrja/view?usp=sharing)
 
 
 ## Tecnologías Implementadas
