@@ -16,6 +16,9 @@ import time
 """Dato Random: Al principio perdí mucho tiempo usando diversos, headers y proxies para intentar bypassear el trafico,
    pero la misma pagina me dice que cada 15 min puedo volver a obtener la lista así que no hay problema, cada 15 actualizo"""
 
+# Django-Rest-Framwork tiene un decorador que se llama @permission_classes donde podemos definir los permisos de si está autenticado o si es Admin, sin embargo decidí hacerlo manualmente mediante
+# el archivo permissions.py
+
 # Vista para obtener todas las IP's obtenidas de la fuente externa :) 
 @api_view(['GET'])
 @user_permission_required
