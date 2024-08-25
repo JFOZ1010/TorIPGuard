@@ -103,6 +103,10 @@ def update_excluded_ip_view(request):
         ip_entry = ExcludedIP.objects.get(ip_address=old_ip)
         ip_entry.ip_address = new_ip
         ip_entry.save()
+
+        # Actualizamos el archivo ips-tor2.txt
+        IPManager.update_ip_file()
+
         return Response({'Mensaje': 'IP actualizada éxitosamente! c: '}, status=status.HTTP_200_OK)
     except ExcludedIP.DoesNotExist:
         return Response({'Error': 'Antigua IP no encontrada'}, status=status.HTTP_404_NOT_FOUND)
@@ -115,6 +119,10 @@ def delete_specific_excluded_ip_view(request, ip_address):
     try:
         ip = ExcludedIP.objects.get(ip_address=ip_address)
         ip.delete()
+
+        # Actualizamos igual el archivo ips-tor2.txt
+        IPManager.update_ip_file()
+
         return Response({'Mensaje': 'IP eliminada éxitosamente! :)'}, status=status.HTTP_204_NO_CONTENT)
     except ExcludedIP.DoesNotExist:
         return Response({'Error': 'IP no encontrada'}, status=status.HTTP_404_NOT_FOUND)

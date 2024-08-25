@@ -46,3 +46,14 @@ class IPManager:
         all_ips_set = set(all_ips)
         filtered_ips = all_ips_set - excluded_ips_set
         return list(filtered_ips)
+    
+    #Aqui quiero actualizar el archivo .txt de las Ip's excluidas ya que fue algo que pasé por alto, en la BD todo bien pero el archivo .txt debe tambien verse reflejado.
+    @staticmethod
+    def update_ip_file():
+        # Obtener todas las IPs excluidas de la base de datos
+        excluded_ips = ExcludedIP.objects.all().values_list('ip_address', flat=True)
+        
+        # Sobrescribir el archivo con las IPs excluidas
+        with open('ips-tor2.txt', 'w') as file:
+            for ip in excluded_ips:
+                file.write(f"{ip}\n")
