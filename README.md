@@ -141,3 +141,7 @@ Este código es proporcionado por mi persona Juan Felipe Osorio para su evaluaci
 4. **Sin Garantías**: El código se proporciona "tal cual" sin garantías de ningún tipo, ya sea expresa o implícita.
 
 5. **Contacto**: Para cualquier consulta relacionada con el uso de este código, por favor contactarse conmigo a juanfelipeoz.rar@gmail.com
+
+Muchas Gracias! 
+
+Happy Hacking! :D
