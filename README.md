@@ -40,34 +40,34 @@ Este proyecto es una API REST para la gestión de IPs maliciosas en redes TOR. L
 1.  **Clona el repositorio**:
 
 ```bash
- git clone https://github.com/JFOZ1010/Challenge-BISO.git
+git clone https://github.com/JFOZ1010/Challenge-BISO.git
 
- cd Challenge-BISO
+cd Challenge-BISO
 ```
 2. **Configura el entorno virtual**
 
 	```bash
-		-  `python3` -m venv venv 
+	-  `python3` -m venv venv 
 	```
  3. **Activa el entorno virtual**:
 	 - Para macOS/Linux:
 	```bash
-		-   source venv/bin/activate 
+	-   source venv/bin/activate 
 	```
 	- Para Windows:
 	```bash
-		-   `.\venv\Scripts\activate` 
+	-   `.\venv\Scripts\activate` 
 	```
  4. **Instala las dependencias.**
 	- Con el gestor de paquetes `pip`: 
 	```bash
-		-   `pip3 install -r requirements.txt` 
+	-   pip3 install -r requirements.txt 
 	```
  5. **Configura y corre la instancia de Docker**:
 	 - Tener `Docker` y `Docker Compose` instalados.
 	 - Corremos docker-compose:
 	```bash
-		-  `docker-compose up --build`
+	-  docker-compose up --build
 	```
 6. **Accedemos a la API**: 
 	 - La API estará disponible en `http://localhost:8000/`
