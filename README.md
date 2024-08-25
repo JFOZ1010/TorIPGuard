@@ -8,6 +8,10 @@ Este proyecto es una API REST para la gestión de IPs maliciosas en redes TOR. L
 
 **Prueba funcional `Endpoints` en video:** [Ver Video](https://drive.google.com/file/d/19Tovd27FzccF09oAFttbefHXdz0CWrja/view?usp=sharing)
 
+**Demostración Entorno `venv` y `Docker`** 
+
+<a href="https://asciinema.org/a/673511" target="_blank"><img src="https://asciinema.org/a/673511.svg" /></a>
+
 
 ## Tecnologías Implementadas
 
