@@ -1,7 +1,12 @@
+from django.http import JsonResponse
+from django.conf import settings
+
 import logging
 import time
 import datetime
 import logging
+import jwt
+
 
 #logger = logging.getLogger('django')
 logger = logging.getLogger('getterIps.middleware')
@@ -81,3 +86,24 @@ class RequestTimeLoggingMiddleware:
         # Llamar al siguiente middleware o vista
         response = self.get_response(request)
         return response
+    
+
+# Estuve probando posibles escenarios de ataques por confusión de algoritmos JWT's sin embargo no tuve resultados negativos, de igual forma quiero implementar esta
+# funcionalidad en middleware para evitar alguna tecnica avanzada que no conozca.
+class JWTAuthenticationMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        token = request.headers.get('Authorization').split()[1] if request.headers.get('Authorization') else None
+        if token:
+            try:
+                decoded = jwt.decode(token, settings.SIMPLE_JWT['SIGNING_KEY'], algorithms=[settings.SIMPLE_JWT['ALGORITHM']])
+                request.user_data = decoded
+            except jwt.InvalidAlgorithmError:
+                return JsonResponse({'error': 'Algoritmo no permitido'}, status=400)
+            except jwt.InvalidTokenError:
+                return JsonResponse({'error': 'Token inválido'}, status=401)
+        
+        response = self.get_response(request)
+        return response 

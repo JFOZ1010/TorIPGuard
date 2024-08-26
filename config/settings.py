@@ -82,6 +82,7 @@ MIDDLEWARE = [
     'getterIps.middleware.DeviceBrowserLoggingMiddleware',
     'getterIps.middleware.UserAuditingMiddleware',
     'getterIps.middleware.RequestTimeLoggingMiddleware',
+    'getterIps.middleware.JWTAuthenticationMiddleware',
 ]
 
 LOGGING = {
