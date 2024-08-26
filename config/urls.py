@@ -21,7 +21,7 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
-
+# Me disculpo por dejar esta vista de home por aquí, sé que no es una buena practica, tuve un error extraño con los templates y no me dejaba llamarlos desde mi app, está fue la solución temporal que encontré :)
 def home_view(request):
     html = """
 <!DOCTYPE html>
