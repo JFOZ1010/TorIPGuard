@@ -9,8 +9,7 @@ urlpatterns = [
     path('ip_stats/', views.ip_stats_view, name='ip_stats_view'),
     path('count-all-ips/', views.count_all_ips_view, name='count_ips_in_file'),
     path('update-excluded-ip/', views.update_excluded_ip_view, name='update_excluded_ip'),
-    path('delete-excluded-ip/<str:ip_address>/', views.delete_specific_excluded_ip_view, name='delete_specific_excluded_ip'),    
-    
+    path('delete-excluded-ip/<str:ip_address>/', views.delete_specific_excluded_ip_view, name='delete_specific_excluded_ip'),        
     
     ## Dejo métodos adicionales para la API - Por el momento no funcionales.
     #path('get-ip-excluded/<str:ip_address>/', views.ip_excluded_details_view, name='get_ip_details'),
