@@ -7,7 +7,10 @@ db.sqlite3
 media/
 staticfiles/
 
-# If you're using Docker
 .env
 venv/
 docker-compose.override.yml
+
+/database/
+database/
+*database/
