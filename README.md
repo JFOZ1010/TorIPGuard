@@ -127,4 +127,4 @@ Para poder generar un token JWT, es necesario autenticarse como uno de los sigui
 
 Muchas Gracias! 
 
-Happy Hacking! :D :,
+Happy Hacking! :D
