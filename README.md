@@ -119,11 +119,9 @@ Para poder generar un token JWT, es necesario autenticarse como uno de los sigui
  
 ### Licencia
 
-1. **No Redistribución**: El código no puede ser redistribuido, compartido públicamente, o modificado sin mi consentimiento explícito.
+1. **Propiedad**: Todos los derechos de propiedad intelectual sobre el código permanecen con Juan Felipe Osorio.
 
-2. **Propiedad**: Todos los derechos de propiedad intelectual sobre el código permanecen con Juan Felipe Osorio.
-
-3. **Contacto**: Para cualquier consulta relacionada con el uso de este código, por favor contactarse conmigo a juanfelipeoz.rar@gmail.com
+2. **Contacto**: Para cualquier consulta relacionada con el uso de este código, por favor contactarse conmigo a juanfelipeoz.rar@gmail.com
 
 Muchas Gracias! 
 
