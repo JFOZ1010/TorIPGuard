@@ -12,10 +12,10 @@ Este proyecto es una API REST para la gestión de IPs maliciosas en redes TOR. L
 
 <a href="https://asciinema.org/a/673511" target="_blank"><img src="https://asciinema.org/a/673511.svg" /></a>
 
-## Soluciones Adicionales
+## Solución Adicional
 
 - **Solución Cloud GCP**: [Ver Documento](https://docs.google.com/document/d/1_MPDZHReXVXV71MRSsTcdpDIm9wBvWXF8lNe-VYk0bE/edit?usp=sharing)
-- **Solución Reto 2 Flujo de Negocio**: [Ver Documento](https://docs.google.com/document/d/1PcQar9YblnnaPwFSoLBZErjwb-ZmNH_ygzXxbBfWdMI/edit?usp=sharing)
+  
 
 ## Tecnologías Implementadas
 
