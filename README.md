@@ -1,4 +1,4 @@
-# GetterIPS - Reto BISO Mercado Libre
+# GetterIPS
 
   
 
@@ -54,32 +54,13 @@ git clone https://github.com/JFOZ1010/Challenge-BISO.git
 
 cd Challenge-BISO
 ```
-2. **Configura el entorno virtual**
-
-	```bash
-	-  `python3` -m venv venv 
-	```
- 3. **Activa el entorno virtual**:
-	 - Para macOS/Linux:
-	```bash
-	-   source venv/bin/activate 
-	```
-	- Para Windows:
-	```bash
-	-   `.\venv\Scripts\activate` 
-	```
- 4. **Instala las dependencias.**
-	- Con el gestor de paquetes `pip`: 
-	```bash
-	-   pip3 install -r requirements.txt 
-	```
- 5. **Configura y corre la instancia de Docker**:
+ 2. **Configura y corre la instancia de Docker**:
 	 - Tener `Docker` y `Docker Compose` instalados.
 	 - Corremos docker-compose:
 	```bash
 	-  docker-compose up --build
 	```
-6. **Accedemos a la API**: 
+3. **Accedemos a la API**: 
 	 - La API estará disponible en `http://localhost:8000/`
 
 ## Uso de la API
@@ -135,22 +116,14 @@ Para poder generar un token JWT, es necesario autenticarse como uno de los sigui
 	curl -X GET http://localhost:8000/getterIPS/get-filtered-ips/ -H "Authorization: Bearer <token_jwt>"
 #### Contar las IPs excluidas
 	curl -X GET http://localhost:8000/getterIPS/count_excluded_ips/ -H "Authorization: Bearer <token_jwt>"
+ 
+### Licencia
 
-## Licencia
+1. **No Redistribución**: El código no puede ser redistribuido, compartido públicamente, o modificado sin mi consentimiento explícito.
 
-### Licencia Personalizada para Mercado Libre
+2. **Propiedad**: Todos los derechos de propiedad intelectual sobre el código permanecen con Juan Felipe Osorio.
 
-Este código es proporcionado por mi persona Juan Felipe Osorio para su evaluación en el proceso de selección para la vacante en Mercado Libre. El uso del código está sujeto a las siguientes condiciones:
-
-1. **Uso Exclusivo para Evaluación**: Este código puede ser utilizado únicamente por Mercado Libre para evaluar mi candidatura para la vacante. No debe ser utilizado para ningún otro propósito.
-
-2. **No Redistribución**: El código no puede ser redistribuido, compartido públicamente, o modificado sin mi consentimiento explícito.
-
-3. **Propiedad**: Todos los derechos de propiedad intelectual sobre el código permanecen con Juan Felipe Osorio.
-
-4. **Sin Garantías**: El código se proporciona "tal cual" sin garantías de ningún tipo, ya sea expresa o implícita.
-
-5. **Contacto**: Para cualquier consulta relacionada con el uso de este código, por favor contactarse conmigo a juanfelipeoz.rar@gmail.com
+3. **Contacto**: Para cualquier consulta relacionada con el uso de este código, por favor contactarse conmigo a juanfelipeoz.rar@gmail.com
 
 Muchas Gracias! 
 
